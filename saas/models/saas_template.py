@@ -128,6 +128,7 @@ class SAASTemplateLine(models.Model):
         ('done', 'Ready'),
 
     ], default='draft')
+    template_language = fields.Char('Language', default='en_US')
 
     @api.model
     def unlink(self):
@@ -179,10 +180,11 @@ class SAASTemplateLine(models.Model):
             r.write({
                 'state': 'creating',
             })
-            r.flush()
+            r.flush_recordset()
             r.operator_db_id.with_delay().create_db(
                 None,
                 r.template_id.template_demo,
+                lang=r.template_language,
                 callback_obj=r,
                 callback_method='_on_template_created')
 

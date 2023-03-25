@@ -59,8 +59,8 @@ db_filter_org = http.db_filter
 host2db_config = Host2DBConfig()
 
 
-def db_filter(dbs, httprequest=None):
-    httprequest = httprequest or http.request.httprequest
+def db_filter(dbs, host=None):
+    httprequest = http.request.httprequest
     h = httprequest.environ.get("HTTP_HOST", "").split(":")[0]
     dbname = host2db_config.get_db_by_host(h)
     if dbname:
