@@ -1,6 +1,7 @@
 import configparser
 import logging
 import os
+import re
 from time import time
 
 from odoo import http
@@ -63,10 +64,16 @@ def db_filter(dbs, host=None):
     httprequest = http.request.httprequest
     h = httprequest.environ.get("HTTP_HOST", "").split(":")[0]
     dbname = host2db_config.get_db_by_host(h)
+
     if dbname:
         return [dbname]
     else:
-        return db_filter_org(dbs, httprequest)
+        dbs = db_filter_org(dbs, host)
+        db_filter_hdr = httprequest.environ.get("HTTP_X_ODOO_DBFILTER")
+        if db_filter_hdr:
+            dbs = [db for db in dbs if re.match(db_filter_hdr, db)]
+
+        return dbs
 
 
 if "host2db" in config.get("server_wide_modules"):
