@@ -161,7 +161,7 @@ class Contract(models.Model):
             contract = invoice.contract_id
             build = contract.build_id
 
-            contract.invalidate_cache()
+            contract.invalidate_recordset()
             if build and build.state == "done":
                 invoice.action_post()
 
