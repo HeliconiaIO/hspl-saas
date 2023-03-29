@@ -21,6 +21,10 @@ class SAASDB(models.Model):
         ('done', 'Ready'),
     ], default='draft')
 
+    _sql_constraints = [
+        ('name_unique', 'unique(name)', "Must be unique database name!"),
+    ]
+
     def unlink(self):
         self.drop_db()
         return super(SAASDB, self).unlink()
@@ -55,7 +59,8 @@ class SAASDB(models.Model):
 
     def write(self, vals):
         res = super(SAASDB, self).write(vals)
-        if not self.env.context.get("writing_from_refresh_data"):  # Do not run "refresh_data", if already running it
+        # Do not run "refresh_data", if already running it
+        if not self.env.context.get("writing_from_refresh_data"):
             self.refresh_data()
         return res
 
@@ -89,4 +94,5 @@ class SAASDB(models.Model):
     def action_install_missing_mandatory_modules(self):
         for build in self.filtered(lambda x: x.state == "done"):
             operator = build.operator_id
-            operator._install_modules(build.name, [('name', 'in', operator.get_mandatory_modules())])
+            operator._install_modules(
+                build.name, [('name', 'in', operator.get_mandatory_modules())])
