@@ -174,10 +174,15 @@ class ContractLine(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        move_line_id = vals_list.pop("move_line_id", None)
-        res = super(ContractLine, self).create(vals_list)
-        if move_line_id:
-            self.env["account.move.line"].sudo().browse(move_line_id).write({
-                "contract_line_id": res.id,
+        result = []
+        for vals in vals_list:
+            move_line_id = vals.pop("move_line_id", None)
+            product_id = vals.get("product_id")
+            result.append({"product_id":product_id, "move_line_id": move_line_id})
+        records = super(ContractLine, self).create(vals_list)
+        for res in result:
+            selected_rec = records.filtered(lambda r: r.product_id.id == res.get("product_id"))
+            self.env["account.move.line"].sudo().browse(res.get("move_line_id")).write({
+                "contract_line_id": selected_rec.id,
             })
-        return res
+        return records

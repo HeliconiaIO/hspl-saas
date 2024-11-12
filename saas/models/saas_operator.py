@@ -87,6 +87,7 @@ class SAASOperator(models.Model):
     def post_init(self, template_id, template_operator_id):
         self.ensure_one()
         self._post_init(template_operator_id.operator_db_name, template_id.template_post_init)
+        self.build_post_init(template_operator_id.operator_db_id, template_id.build_post_init, {})
         template_operator_id.state = 'done'
 
     def _map_domain(self, domain, db_name):

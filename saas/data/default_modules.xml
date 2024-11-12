@@ -133,4 +133,12 @@
         <field name="name">repair</field>
         <field name="description">Repairs</field>
     </record>
+    <record id="hspl_ecommerce" model="saas.module">
+        <field name="name">hspl_ecommerce</field>
+        <field name="description">Heliconia eCommerce</field>
+    </record>
+    <record id="hspl_ecommerce_graphql" model="saas.module">
+        <field name="name">hspl_ecommerce_graphql</field>
+        <field name="description">Heliconia eCommerce GraphQL</field>
+    </record>
 </odoo>

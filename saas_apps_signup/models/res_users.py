@@ -45,7 +45,7 @@ class ResUsers(models.Model):
         res = super(ResUsers, self).signup(values, *args, **kwargs)
 
         if database_name:
-            admin_user = self.env['res.users'].sudo().search([('login', '=', res[1])], limit=1)
+            admin_user = self.env['res.users'].sudo().search([('login', '=', res[0])], limit=1)
 
             build = self.env["saas.db"].create({
                 "name": database_name,
@@ -67,7 +67,7 @@ class ResUsers(models.Model):
         operator_id = int(values.pop("operator_id"))
 
         res = super(ResUsers, self).signup(values, *args, **kwargs)
-        admin_user = self.env['res.users'].sudo().search([('login', '=', res[1])], limit=1)
+        admin_user = self.env['res.users'].sudo().search([('login', '=', res[0])], limit=1)
         sale_order.partner_id = admin_user.partner_id
 
         build = self.env["saas.db"].create({

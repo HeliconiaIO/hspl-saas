@@ -12,7 +12,7 @@ class AccountMove(models.Model):
 
     _inherit = 'account.move'
 
-    def action_invoice_paid(self):
+    def _invoice_paid_hook(self):
         sale_lines = self.mapped("line_ids.sale_line_ids")
         today = date.today()
 
@@ -71,4 +71,4 @@ class AccountMove(models.Model):
                 "recurring_rule_type": subscription_period + "ly",
                 "recurring_interval": 1,
             })
-        super(AccountMove, self).action_invoice_paid()
+        super(AccountMove, self)._invoice_paid_hook()
