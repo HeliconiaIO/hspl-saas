@@ -45,7 +45,7 @@ class SAASOperator(models.Model):
         return action
 
     def get_mandatory_modules(self):
-        return ["auth_quick"]
+        return ["auth_quick", "access_settings_menu"]
 
     def _create_db(self, template_db, db_name, demo, lang='en_US'):
         """Synchronous db creation"""
