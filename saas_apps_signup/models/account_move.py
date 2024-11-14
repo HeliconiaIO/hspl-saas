@@ -20,55 +20,62 @@ class AccountMove(models.Model):
             sale_lines_in_order = sale_lines.filtered(lambda x: x.order_id == order)
             new_contract_lines = []
             partner = order.partner_id
+            subscription_period = False
 
             user_line = sale_lines_in_order.filtered(lambda l: l.product_id.product_tmpl_id == self.env.ref("saas_product.product_users"))
-            if user_line.product_id == self.env.ref("saas_product.product_users_monthly"):
-                subscription_period = "month"
-            elif user_line.product_id == self.env.ref("saas_product.product_users_annually"):
-                subscription_period = "year"
 
-            build_vals = {}
-            for l in sale_lines_in_order:
-                p = l.product_id
-                if p.product_tmpl_id == self.env.ref("saas_product.product_users") and p != self.env.ref("saas_product.product_users_trial"):
-                    new_contract_lines.append({
-                        "name": p.name,
-                        "product_id": p.id,
-                        "price_unit": p.lst_price,
-                        "quantity": l.qty_invoiced,
-                        "move_line_id": l.invoice_lines[0].id,
-                    })
-                    build_vals["expiration_date"] = today + p._get_expiration_timedelta()
-                    build_vals["max_users_limit"] = l.qty_invoiced
-                elif self.env["saas.app"].search([("product_tmpl_id", "=", p.product_tmpl_id.id)]):
-                    new_contract_lines.append({
-                        "name": p.name,
-                        "product_id": p.id,
-                        "price_unit": p.lst_price,
-                        "quantity": l.qty_invoiced,
-                        "move_line_id": l.invoice_lines[0].id,
-                    })
-                elif self.env["saas.template"].search([("product_tmpl_id", "=", p.product_tmpl_id.id)]):
-                    new_contract_lines.append({
-                        "name": p.name,
-                        "product_id": p.id,
-                        "price_unit": p.lst_price,
-                        "quantity": l.qty_invoiced,
-                        "move_line_id": l.invoice_lines[0].id,
-                    })
+            if not user_line and len(sale_lines_in_order) == 1:
+                user_line = sale_lines_in_order
+                if user_line:
+                    if self.env.ref("saas_product.product_attribute_value_subscription_monthly").id in user_line.product_id.mapped('product_template_variant_value_ids.product_attribute_value_id').ids:
+                        subscription_period = "month"
+                    elif self.env.ref("saas_product.product_attribute_value_subscription_annually").id in user_line.product_id.mapped('product_template_variant_value_ids.product_attribute_value_id').ids:
+                        subscription_period = "year"
 
-                for x in new_contract_lines:
-                    x.update({
-                        "uom_id": self.env.ref("uom.product_uom_unit").id,
-                    })
+            if subscription_period:
+                build_vals = {}
+                for l in sale_lines_in_order:
+                    p = l.product_id
+                    if l == user_line:
+                        build_vals["expiration_date"] = today + p._get_expiration_timedelta()
+                        build_vals["max_users_limit"] = l.qty_invoiced
+                    if p.product_tmpl_id == self.env.ref("saas_product.product_users") and p != self.env.ref("saas_product.product_users_trial"):
+                        new_contract_lines.append({
+                            "name": p.name,
+                            "product_id": p.id,
+                            "price_unit": p.lst_price,
+                            "quantity": l.qty_invoiced,
+                            "move_line_id": l.invoice_lines[0].id,
+                        })
+                    elif self.env["saas.app"].search([("product_tmpl_id", "=", p.product_tmpl_id.id)]):
+                        new_contract_lines.append({
+                            "name": p.name,
+                            "product_id": p.id,
+                            "price_unit": p.lst_price,
+                            "quantity": l.qty_invoiced,
+                            "move_line_id": l.invoice_lines[0].id,
+                        })
+                    elif self.env["saas.template"].search([("product_tmpl_id", "=", p.product_tmpl_id.id)]):
+                        new_contract_lines.append({
+                            "name": p.name,
+                            "product_id": p.id,
+                            "price_unit": p.lst_price,
+                            "quantity": l.qty_invoiced,
+                            "move_line_id": l.invoice_lines[0].id,
+                        })
 
-            self.env["contract.contract"].with_context(create_build_vals=build_vals).create({
-                "name": "{}'s SaaS Contract".format(partner.name),
-                "partner_id": partner.id,
-                "contract_line_ids": list(map(lambda line: (0, 0, line), new_contract_lines)),
-                "line_recurrence": False,
-                "build_id": order.build_id.id,
-                "recurring_rule_type": subscription_period + "ly",
-                "recurring_interval": 1,
-            })
-        super(AccountMove, self)._invoice_paid_hook()
+                    for x in new_contract_lines:
+                        x.update({
+                            "uom_id": self.env.ref("uom.product_uom_unit").id,
+                        })
+
+                self.env["contract.contract"].with_context(create_build_vals=build_vals).create({
+                    "name": "{}'s SaaS Contract".format(partner.name),
+                    "partner_id": partner.id,
+                    "contract_line_ids": list(map(lambda line: (0, 0, line), new_contract_lines)),
+                    "line_recurrence": False,
+                    "build_id": order.build_id.id,
+                    "recurring_rule_type": subscription_period + "ly",
+                    "recurring_interval": 1,
+                })
+        return super(AccountMove, self)._invoice_paid_hook()

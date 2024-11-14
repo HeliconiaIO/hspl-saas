@@ -28,9 +28,9 @@ class Product(models.Model):
     def _get_expiration_timedelta(self):
         self.ensure_one()
         self = self.sudo()
-        if self == self.env.ref("saas_product.product_users_annually"):
+        if self.env.ref("saas_product.product_attribute_value_subscription_annually").id in self.mapped('product_template_variant_value_ids.product_attribute_value_id').ids:
             return timedelta(days=365)
-        elif self == self.env.ref("saas_product.product_users_monthly"):
+        elif self.env.ref("saas_product.product_attribute_value_subscription_monthly").id in self.mapped('product_template_variant_value_ids.product_attribute_value_id').ids:
             return timedelta(days=30)
         else:
             raise NotImplementedError
