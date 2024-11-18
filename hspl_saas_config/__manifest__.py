@@ -12,9 +12,11 @@
     'category': 'Marketing',
     'version': '16.0.1.0.0',
 
-    'depends': ['base', 'saas_apps'],
+    'depends': ['base', 'saas_apps', 'contract'],
 
     'data': [
+        'data/contract_cron.xml',
+        'data/mail_template.xml',
         'views/views.xml',
         'views/templates.xml',
     ],
