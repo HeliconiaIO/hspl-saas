@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <template id="price_inherited" inherit_id="saas_apps.price">
+        <xpath expr="//div[@id='users_block']/parent::div/parent::t[@t-if='show_apps or show_packages']" position="attributes">
+            <attribute name="t-if">show_users and (show_apps or show_packages)</attribute>
+        </xpath>
+        <xpath expr="//div[@id='price-window']/div/ul" position="replace">
+            <ul class="nav nav-pills card-header-pills">
+                <li class="nav-item" data-type="yearly" id="yearly" t-if="show_yearly">
+                    <a data-toggle="tab" data-period="year" href="javascript:void(0)" class="nav-link px-3 border-top-0 rounded-0 fw_bold switch-period active">Annually</a>
+                </li>
+                <li data-type="monthly" class="nav-item" id="monthly" t-if="show_monthly">
+                    <a data-toggle="tab" data-period="month" href="javascript:void(0)" t-attf-class="nav-link px-2 border-top-0 rounded-0 fw_bold switch-period {{'active' if not show_yearly and show_monthly else ''}}">Monthly</a>
+                </li>
+            </ul>
+        </xpath>
+        <xpath expr="//ul[hasclass('list-unstyled')]" position="replace">
+            <ul class="list-unstyled mt-3 mb-4 transition">
+                <li t-if="show_users">
+                    <div class="leftstr"><b id="users-qty" class="left-align-price">1</b> Users</div>
+                    <div class="rightstr">
+                        <div id="users-cnt-cost" class="d-inline">0 </div>
+                        <div id="users-cnt-currency" class="d-inline"><t t-out="currency.symbol"/></div>
+                    </div>
+                </li>
+                <li>
+                    <div class="leftstr"><b id="apps-qty" class="left-align-price">0</b> Apps</div>
+                    <div class="rightstr">
+                        <div id="apps-cost" class="d-inline">0 </div>
+                        <div id="apps-cost-currency" class="d-inline"><t t-out="currency.symbol"/></div>
+                    </div>
+                </li>
+            </ul>
+        </xpath>
+    </template>
+</odoo>
