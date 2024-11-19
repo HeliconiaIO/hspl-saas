@@ -21,6 +21,7 @@ class AccountMove(models.Model):
             new_contract_lines = []
             partner = order.partner_id
             subscription_period = False
+            expiration_date = False
 
             user_line = sale_lines_in_order.filtered(lambda l: l.product_id.product_tmpl_id == self.env.ref("saas_product.product_users"))
 
@@ -37,7 +38,8 @@ class AccountMove(models.Model):
                 for l in sale_lines_in_order:
                     p = l.product_id
                     if l == user_line:
-                        build_vals["expiration_date"] = today + p._get_expiration_timedelta()
+                        expiration_date = today + p._get_expiration_timedelta()
+                        build_vals["expiration_date"] = expiration_date
                         build_vals["max_users_limit"] = l.qty_invoiced
                     if p.product_tmpl_id == self.env.ref("saas_product.product_users") and p != self.env.ref("saas_product.product_users_trial"):
                         new_contract_lines.append({
@@ -77,5 +79,6 @@ class AccountMove(models.Model):
                     "build_id": order.build_id.id,
                     "recurring_rule_type": subscription_period + "ly",
                     "recurring_interval": 1,
+                    "recurring_next_date": expiration_date
                 })
         return super(AccountMove, self)._invoice_paid_hook()

@@ -2,7 +2,7 @@
 # License MIT (https://opensource.org/licenses/MIT).
 
 from odoo import api, fields, models
-from datetime import timedelta
+from dateutil.relativedelta import relativedelta
 
 
 class ProductTemplate(models.Model):
@@ -29,8 +29,8 @@ class Product(models.Model):
         self.ensure_one()
         self = self.sudo()
         if self.env.ref("saas_product.product_attribute_value_subscription_annually").id in self.mapped('product_template_variant_value_ids.product_attribute_value_id').ids:
-            return timedelta(days=365)
+            return relativedelta(years=1)
         elif self.env.ref("saas_product.product_attribute_value_subscription_monthly").id in self.mapped('product_template_variant_value_ids.product_attribute_value_id').ids:
-            return timedelta(days=30)
+            return relativedelta(months=1)
         else:
             raise NotImplementedError
