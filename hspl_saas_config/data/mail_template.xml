@@ -4,7 +4,7 @@
 <record id="mail_template_contract_expiry_alert" model="mail.template">
     <field name="name">Contract: Email Expiry Alert</field>
     <field name="model_id" ref="contract.model_contract_contract"/>
-    <field name="subject">{{ object.company_id.name }}: Contract Expiry Alert for {{ object.partner_id.company_name }}</field>
+    <field name="subject">Action Required: Your SaaS Contract is Expiring Soon</field>
     <field name="email_from">{{ object.company_id.email }}</field>
     <field name="email_to">{{ object.partner_id.email }}</field>
     <field name="auto_delete" eval="True"/>
@@ -31,25 +31,29 @@
                     <tr>
                         <td style="padding:15px 20px 10px 20px;">
                             <p>Dear <t t-out="object.partner_id.name or ''"/>,</p>
-                            <p>Your contract <strong t-out="object.name or ''"/>
-                               is going to expire on <strong t-out="object.recurring_next_date or ''"/>.
+                            <p>We hope this message finds you well.</p>
+                            <p>We would like to inform you that your contract, <strong t-out="object.name or ''"/>
+                               is set to expire on <strong t-out="object.recurring_next_date or ''"/>.
                             </p>
-                            <p>If you have any concerns about it, please contact your representative at
-                               <t t-out="object.company_id.name or ''"/> or reply to this email.
+                            <p>If you have any questions or concerns,
+                                please don't hesitate to contact your representative at <t t-out="object.company_id.name or ''"/> or simply reply to this email.
                             </p>
-                            <p>Your contract will expire in just <t t-out="object.get_different_days()"/> days! Please take action if needed.</p>
+                            <p>Please note that your contract will expire in <strong><t t-out="object.get_different_days()"/> days</strong>.
+                                If you wish to continue enjoying our services, we encourage you to take action at your earliest convenience.</p>
 
                             <!-- Added Payment Section -->
-                            <p>If you wish to renew your contract, you can easily complete the payment by clicking the link below:</p>
+                            <p>To renew your contract, please click the link below to complete the payment:</p>
                             <p>
-                                <a href="object.get_renew_payment_link()"
+                                <a t-att-href="object.get_renew_payment_link()"
                                    style="color:#ffffff;background-color:#007bff;padding:10px 20px;border-radius:5px;text-decoration:none;">
                                     Renew Contract Now
                                 </a>
                             </p>
-                            <p>This will direct you to the payment page where you can complete your renewal.</p>
+                            <p>This link will direct you to the payment page, where you can finalize your renewal quickly and securely.</p>
+                            <p>Thank you for choosing <strong t-out="object.company_id.name or ''"/>. We look forward to continuing to serve you.</p>
 
                             <p>Kind regards,</p>
+                            <p><strong t-out="object.company_id.name or ''"/></p>
                         </td>
                     </tr>
                     <tr>
