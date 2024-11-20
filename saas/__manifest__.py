@@ -9,7 +9,7 @@
     "category": "SaaS",
     # "live_test_url": "http://apps.it-projects.info/shop/product/DEMO-URL?version=14.0",
     "images": [],
-    "version": "16.0.1.0.1",
+    "version": "18.0.1.0.0",
     "application": False,
 
     "author": "IT-Projects LLC, Ivan Yelizariev",

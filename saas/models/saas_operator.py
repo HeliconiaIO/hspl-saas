@@ -38,9 +38,9 @@ class SAASOperator(models.Model):
             "type": "ir.actions.act_window",
             "name": "Builds and templates",
             "res_model": "saas.db",
-            "view_mode": "tree,form",
+            "view_mode": "list,form",
             "domain": [["operator_id", "=", self.id]],
-            "views": [[False, "tree"], [False, "form"]],
+            "views": [[False, "list"], [False, "form"]],
         }
         return action
 

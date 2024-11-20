@@ -1,7 +1,7 @@
 {
     "name": "SaaS: Domain names",
     "images": [],
-    "version": "15.0.0.1.0",
+    "version": "18.0.1.0.0",
     "author": "IT-Projects LLC, Eugene Molotov",
     "support": "it@it-projects.info",
     "license": "AGPL-3",

@@ -10,7 +10,7 @@
     'website': "https://www.heliconia.io",
 
     'category': 'Marketing',
-    'version': '16.0.1.0.0',
+    'version': '18.0.1.0.0',
 
     'depends': ['base', 'saas_apps', 'contract', 'saas_contract'],
 

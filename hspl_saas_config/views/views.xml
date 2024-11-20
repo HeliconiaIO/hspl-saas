@@ -5,40 +5,16 @@
         <field name="model">res.config.settings</field>
         <field name="inherit_id" ref="saas_apps.res_config_settings_view_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//div[@id='apps_general_settings']" position="inside">
-                <div class="col-12 col-md-6 o_setting_box" attrs="{'invisible': [('show_packages', '=', False)]}">
-                    <div class="o_setting_left_pane">
-                        <field name="show_monthly"/>
-                    </div>
-                    <div class="o_setting_right_pane">
-                        <label for="show_monthly" string="Show Monthly package"/>
-                        <div class="text-muted">
-                            Show Monthly packages at "price" page
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6 o_setting_box" attrs="{'invisible': [('show_packages', '=', False)]}" >
-                    <div class="o_setting_left_pane">
-                        <field name="show_yearly"/>
-                    </div>
-                    <div class="o_setting_right_pane">
-                        <label for="show_yearly" string="Show Yearly package"/>
-                        <div class="text-muted">
-                            Show Yearly packages at "price" page
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6 o_setting_box">
-                    <div class="o_setting_left_pane">
-                        <field name="show_users"/>
-                    </div>
-                    <div class="o_setting_right_pane">
-                        <label for="show_users" string="Show Users"/>
-                        <div class="text-muted">
-                            Show Users selection in "price" page
-                        </div>
-                    </div>
-                </div>
+            <xpath expr="//block[@id='apps_general_settings']" position="inside">
+                <setting id="saas_show_monthly" help="Show Monthly packages at 'price' page" invisible="show_packages == False">
+                    <field name="show_monthly" class="o_light_label" />
+                </setting>
+                <setting id="saas_show_yearly" help="Show Yearly packages at 'price' page" invisible="show_packages == False">
+                    <field name="show_yearly" class="o_light_label" />
+                </setting>
+                <setting id="saas_show_users" help="Show Users selection in 'price' page">
+                    <field name="show_users" class="o_light_label" />
+                </setting>
             </xpath>
         </field>
     </record>

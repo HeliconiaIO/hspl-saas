@@ -61,7 +61,7 @@ class SaasDb(models.Model):
                     # TODO: check if result is successfull1
                     self.execute_kw("base.language.install", "lang_install", wizard_id)
 
-                    _, model, res_id = self.xmlid_lookup("base.user_admin")
+                    model, res_id = self.xmlid_lookup("base.user_admin")
 
                     self.execute_kw(model, "write", [res_id], {"lang": self.admin_user.database_lang})
 

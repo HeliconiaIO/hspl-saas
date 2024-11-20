@@ -5,7 +5,7 @@
     "name": """SaaS: saas_installed_apps""",
     "summary": """This module disallows anyone to install apps on build and shows installed apps.""",
     "category": "Hidden",
-    "version": "16.0.1.0.0",
+    "version": "18.0.1.0.0",
     "application": False,
     "author": "IT-Projects LLC, Bykov Victor",
     "support": "apps@it-projects.info",

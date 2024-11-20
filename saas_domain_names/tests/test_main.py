@@ -1,10 +1,8 @@
 from odoo.tests import HttpCase
-from odoo.addons.http_routing.models.ir_http import slugify
 from odoo.addons.saas.tests.common_saas_test import Common
 
 DB_PREFIX = "saas_domain_names_test_"
 DB_TEMPLATE_NAME = DB_PREFIX + "template"
-DB_NAME = slugify(DB_PREFIX + "db")
 
 
 class TestMain(HttpCase, Common):
@@ -18,6 +16,7 @@ class TestMain(HttpCase, Common):
         return operator.global_url
 
     def test_domain_workflow(self):
+        DB_NAME = self.env['ir.http']._slugify(DB_PREFIX + "db")
         self.drop_dbs([DB_TEMPLATE_NAME, DB_NAME])
 
         env = self.env(context=dict(self.env.context, test_queue_job_no_delay=True))

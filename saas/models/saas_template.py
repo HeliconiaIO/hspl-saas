@@ -8,7 +8,6 @@ import logging
 
 from odoo import models, fields, api, _
 from odoo.tools.safe_eval import test_python_expr
-from odoo.addons.http_routing.models.ir_http import slugify
 from odoo.exceptions import ValidationError, UserError
 from odoo.addons.queue_job.delay import group
 
@@ -196,7 +195,7 @@ class SAASTemplateLine(models.Model):
 
     def prepare_name(self, db_name):
         self.ensure_one()
-        return slugify(db_name)
+        return self.env['ir.http']._slugify(db_name)
 
     def create_db(self, key_values=None, db_name=None, with_delay=True, draft_build_id=None):
         self.ensure_one()

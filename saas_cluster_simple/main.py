@@ -9,8 +9,9 @@ import os
 import re
 import string
 import threading
+from odoo.modules.registry import Registry
 
-from odoo import SUPERUSER_ID, api, registry, sql_db, tools
+from odoo import SUPERUSER_ID, api, sql_db, tools
 from odoo.service import db
 from odoo.service.model import execute_cr
 from odoo.http import _request_stack
@@ -100,7 +101,7 @@ def install_modules(db_name, modules):
 
 def post_init(db_name, template_post_init):
     conn = sql_db.db_connect(db_name)
-    registry(db_name).check_signaling()
+    Registry(db_name).check_signaling()
     with conn.cursor() as cr:
         env = api.Environment(cr, SUPERUSER_ID, {})
         action = env["ir.actions.server"].create(
@@ -160,7 +161,7 @@ def deploy_backup(backup_name):
 
 
 def signal_changes(db):
-    registry(db).signal_changes()
+    Registry(db).signal_changes()
 
 
 # Modified version of odoo.service.model.execute
@@ -171,7 +172,7 @@ def signal_changes(db):
 # @check
 def execute(db, uid, obj, method, *args, **kw):
     threading.current_thread().dbname = db
-    with registry(db).cursor() as cr:
+    with Registry(db).cursor() as cr:
         res = execute_cr(cr, uid, obj, method, *args, **kw)
         if res is None:
             _logger.info('The method %s of the object %s can not return `None` !', method, obj)

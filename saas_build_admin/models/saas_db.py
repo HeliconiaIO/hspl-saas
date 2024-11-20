@@ -61,7 +61,7 @@ class SaasDb(models.Model):
         vals["name"] = self.admin_user.name
         vals["password"] = password
 
-        _, model, res_id = self.xmlid_lookup("base.user_admin")
+        model, res_id = self.xmlid_lookup("base.user_admin")
         new_user = self.execute_kw(model, "copy", res_id, vals)
 
         settings_model, settings_res_id = self.xmlid_to_res_model_res_id(

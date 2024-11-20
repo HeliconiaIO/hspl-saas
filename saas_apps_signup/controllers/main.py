@@ -7,7 +7,6 @@ import logging
 import werkzeug
 from werkzeug.urls import Href, url_encode
 from odoo import SUPERUSER_ID
-from odoo.addons.http_routing.models.ir_http import slugify
 from odoo.addons.saas_portal.controllers.portal import CustomerPortal
 
 _logger = logging.getLogger(__name__)
@@ -20,7 +19,7 @@ class Main(Controller):
         if not database_name:
             return {"answer": "Empty database name"}
 
-        if database_name != slugify(database_name):
+        if database_name != self.env['ir.http']._slugify(database_name):
             return {"answer": "Invalid database name"}
 
         is_free_slot = not request.env["saas.db"].sudo().search([("name", "=", database_name)])
