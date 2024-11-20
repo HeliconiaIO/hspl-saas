@@ -7,7 +7,10 @@
         <field name="priority" eval="100"/>
         <field name="arch" type="xml">
             <field name="year_price" position="after">
-                <field name="expiry_notify_days" required="1" />
+                <label for="expiry_notify_days"/>
+                <div class="o_row">
+                    <field name="expiry_notify_days" class="oe_inline" /> Days
+                </div>
             </field>
         </field>
     </record>
@@ -19,7 +22,10 @@
         <field name="priority" eval="100"/>
         <field name="arch" type="xml">
             <field name="database_limit_size" position="after">
-                <field name="expiry_notify_days" required="1" />
+                <label for="expiry_notify_days"/>
+                <div class="o_row">
+                    <field name="expiry_notify_days" class="oe_inline" /> Days
+                </div>
             </field>
         </field>
     </record>
@@ -31,7 +37,10 @@
         <field name="priority" eval="100"/>
         <field name="arch" type="xml">
             <field name="recurring_invoicing_type" position="after">
-                <field name="expiry_notify_days" />
+                <label for="expiry_notify_days"/>
+                <div class="o_row">
+                    <field name="expiry_notify_days" class="oe_inline" /> Days
+                </div>
             </field>
         </field>
     </record>
