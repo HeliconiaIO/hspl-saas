@@ -62,7 +62,7 @@ class SaasDb(models.Model):
         vals["password"] = password
 
         model, res_id = self.xmlid_lookup("base.user_admin")
-        new_user = self.execute_kw(model, "copy", res_id, vals)
+        new_user = self.execute_kw(model, "copy", res_id, vals)[0]
 
         settings_model, settings_res_id = self.xmlid_to_res_model_res_id(
             "access_apps.group_allow_apps_only_from_settings")

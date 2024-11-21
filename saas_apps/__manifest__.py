@@ -13,7 +13,7 @@
     "support": "apps@it-projects.info",
     "website": "https://apps.odoo.com/apps/modules/14.0/saas_apps/",
     "license": "AGPL-3",
-    "depends": ["saas_product", "saas_public", "website_sale"],
+    "depends": ["web", "base", "saas_product", "saas_public", "website_sale"],
     "external_dependencies": {"python": [], "bin": []},
     "data": [
         "data/product_data.xml",

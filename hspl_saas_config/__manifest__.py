@@ -21,10 +21,4 @@
         'views/templates.xml',
         'views/saas_views.xml',
     ],
-    "assets": {
-        "web.assets_frontend": [
-            ('remove', 'saas_apps/static/src/js/saas_apps.js'),
-            "hspl_saas_config/static/src/js/saas_apps.js",
-        ],
-    },
 }

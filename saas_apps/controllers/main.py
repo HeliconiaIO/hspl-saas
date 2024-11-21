@@ -2,6 +2,8 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
 from odoo.http import route, request, Controller
+from odoo.api import call_kw
+from odoo.models import check_method_name
 from odoo.addons.website_sale.controllers.main import WebsiteSale
 
 
@@ -70,6 +72,19 @@ class SaasAppsCart(WebsiteSale):
         if order:
             for line in order.website_order_line:
                 line.unlink()
+
+    @route(
+        "/saas/packages",
+        type="json",
+        auth="public",
+        methods=["POST"],
+        website=True,
+        csrf=False,
+    )
+    def get_all_packages(self, model, method, args, kwargs):
+        check_method_name(method)
+        return call_kw(request.env[model], method, args, kwargs)
+
 
     @route(
         "/price/cart/update_json",

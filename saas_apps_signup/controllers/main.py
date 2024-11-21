@@ -19,7 +19,7 @@ class Main(Controller):
         if not database_name:
             return {"answer": "Empty database name"}
 
-        if database_name != self.env['ir.http']._slugify(database_name):
+        if database_name != request.env['ir.http']._slugify(database_name):
             return {"answer": "Invalid database name"}
 
         is_free_slot = not request.env["saas.db"].sudo().search([("name", "=", database_name)])

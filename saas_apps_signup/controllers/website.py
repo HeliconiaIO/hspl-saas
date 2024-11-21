@@ -6,15 +6,15 @@ from odoo.http import request
 
 
 class WebsiteSale(BaseWebsiteSale):
-    def checkout_redirection(self, order):
-        response = super(WebsiteSale, self).checkout_redirection(order)
+    def _check_cart(self, order_sudo):
+        response = super(WebsiteSale, self)._check_cart(order_sudo)
         if response:
             return response
 
-        if order:
+        if order_sudo:
             if request.env.user == request.env.ref("base.public_user"):
-                return request.redirect("/web/signup?sale_order_id={}".format(order.id))
-            elif not order.build_id:
+                return request.redirect("/web/signup?sale_order_id={}".format(order_sudo.id))
+            elif not order_sudo.build_id:
                 build = request.env["saas.db"].search([
                     ("type", "=", "build"),
                     ("state", "=", "draft"),
@@ -23,4 +23,4 @@ class WebsiteSale(BaseWebsiteSale):
                 if not build:
                     return request.redirect("/my/builds/create?redirect=/shop/checkout")
 
-                order.build_id = build
+                order_sudo.build_id = build

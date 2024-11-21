@@ -1,270 +1,210 @@
-odoo.define("saas_apps.saas_apps", function (require) {
-  "use strict";
+/** @odoo-module **/
 
-  require("web.dom_ready");
+import publicWidget from "@web/legacy/js/public/public_widget";
+import { rpc } from "@web/core/network/rpc";
 
-  var session = require("web.session");
+export const SaasAppsWidget = publicWidget.Widget.extend({
+    selector: '.js_saas_apps', // The selector for your widget's container
+    events: {
+        'click .app': '_onAppClick',
+        'click .package': '_onPackageClick',
+        'click .switch-period': '_onPeriodSwitch',
+        'click #plus-user': '_onIncreaseUsers',
+        'click #minus-user': '_onDecreaseUsers',
+        'click #try-trial': '_onTryTrial',
+        'click #buy-now': '_onBuyNow',
+    },
 
-  if (!$(".js_saas_apps").length) {
-    return Promise.reject("DOM doesn't contain '.js_saas_apps'");
-  }
+    init: function (parent, options) {
+        this._super(parent, options);
+        this.state = {
+            period: 'year', // Default to yearly
+            basketApps: new Set(),
+            chosenPackageId: null,
+            numUsers: 1,
+            apps: options.apps || [],
+        };
+        this._fetchPackages();
+    },
 
-  var MONTHLY = "month";
-  var ANNUALLY = "year";
-  var basket_apps = new Set();
-  var chosen_package_id = null;
-  var period = ANNUALLY;
-
-  // Задаем свойства вида depends-<MODULE_NAME>=1
-  $(".app[data-depends]").each(function (i, el) {
-    var $el = $(el);
-    $el
-      .data("depends")
-      .split(",")
-      .filter(Boolean)
-      .forEach(function (depend) {
-        $el.data("depends-" + depend, 1);
-      });
-  });
-
-  function getAppNameByElementCallback(i, el) {
-    return $(el).data("name");
-  }
-
-  function renderTotalPrice() {
-    function priceCallback(i, el) {
-      return parseFloat($(el).data("price-" + period) || 0);
-    }
-
-    var chosen_apps = $(".app").filter(function (i, el) {
-      return basket_apps.has(getAppNameByElementCallback(i, el));
-    });
-
-    var chosen_apps_prices = chosen_apps.map(priceCallback).get();
-
-    // Тут вполне допускается вариант, что выбрали несколько пакетов
-    // Хотя функциолом это не продусмотрено
-    var chosen_packages = $(".package").filter(function (i, el) {
-      return $(el).data("package-id") === chosen_package_id;
-    });
-
-    var chosen_packages_prices = chosen_packages.map(priceCallback).get();
-
-    var sum_app_prices = _.reduce(
-      chosen_apps_prices,
-      function (a, c) {
-        return a + c;
-      },
-      0
-    );
-
-    var sum_package_prices = _.reduce(
-      chosen_packages_prices,
-      function (a, c) {
-        return a + c;
-      },
-      0
-    );
-
-    var user_qty = parseInt($("#users").val(), 10);
-    var sum_user_prices =
-      user_qty * parseFloat($("#users_block").data("price-" + period));
-
-    $("#price").html(
-      (sum_app_prices + sum_package_prices + sum_user_prices).toString()
-    );
-    $("#box-period").html(period);
-    $("#users-qty").html(user_qty);
-    $("#users-cnt-cost").html(sum_user_prices);
-    // TODO: надо бы отдельно вписать package, нет?
-    $("#apps-qty").html(chosen_apps.length + chosen_packages.length);
-    $("#apps-cost").html(sum_app_prices + sum_package_prices);
-
-    if (chosen_packages.length === 0 && chosen_apps.length === 0) {
-      $("#btn-block").hide();
-    } else {
-      $("#btn-block").show();
-    }
-  }
-
-  function renderApps() {
-    $(".app").each(function (i, el) {
-      var $app = $(el);
-      if (basket_apps.has($app.data("name"))) {
-        $app.addClass("green-border");
-      } else {
-        $app.removeClass("green-border");
-      }
-    });
-  }
-
-  function renderPackages() {
-    $(".package:not([data-package-id=" + chosen_package_id + "])").removeClass(
-      "green-border"
-    );
-    $(".package[data-package-id=" + chosen_package_id + "]").addClass("green-border");
-  }
-
-  $(".app").on("click", function () {
-    chosen_package_id = null;
-    var $el = $(this);
-    var name = $el.data("name");
-    if (basket_apps.has(name) === false) {
-      basket_apps.add(name);
-      var app_names_to_select = $el
-        .data("depends")
-        .split(",")
-        .filter(Boolean) // take away falsy values
-        .concat([name]);
-      app_names_to_select.forEach(function (app_name) {
-        basket_apps.add(app_name);
-      });
-    } else {
-      var app_names_to_deselect = [name];
-      while (app_names_to_deselect.length > 0) {
-        var app_names_to_deselect_next = [];
-        app_names_to_deselect.forEach(function (app_name) {
-          // Remove from basket
-          basket_apps.delete(app_name);
-
-          // Find other apps that depend on this
-          app_names_to_deselect_next = app_names_to_deselect_next.concat(
-            $(".app:data(depends-" + app_name + ")")
-              .map(getAppNameByElementCallback)
-              .get()
-          );
+    // Fetch the packages dynamically
+    _fetchPackages: function () {
+        rpc('/saas/packages', {
+            model: 'saas.template',
+            method: 'search_read',
+            args: [[["is_package", "=", true]], ['id', 'name', 'year_price', 'month_price', 'is_package']],
+            kwargs: {}
+        }).then((packages) => {
+            this.state.packages = packages;
+            this.renderPackages(); // After packages are fetched, render them
         });
-        app_names_to_deselect = app_names_to_deselect_next;
-      }
-    }
-    renderApps();
-    renderTotalPrice();
-  });
+    },
 
-  $(".package").on("click", function () {
-    basket_apps.clear();
-    var $el = $(this);
-    var package_id = $el.data("package-id");
-
-    if (chosen_package_id === package_id) {
-      chosen_package_id = null;
-    } else {
-      chosen_package_id = package_id;
-    }
-
-    renderApps();
-    renderPackages();
-    renderTotalPrice();
-  });
-
-  function sanitizeUserInput() {
-    var v = $("#users").val();
-    if (parseInt(v, 10) <= 0 || v.trim() === "") {
-      $("#users").val(1);
-    }
-  }
-
-  function getInputs() {
-    sanitizeUserInput();
-    return {
-      chosen_apps: Array.from(basket_apps),
-      chosen_package_id: chosen_package_id,
-      period: period,
-      user_cnt: parseInt($("#users").val(), 10),
-    };
-  }
-
-  function goToBuild(build_params, template_id) {
-    session
-      .rpc("/check_saas_template", {
-        template_id: template_id,
-      })
-      .then(function (template) {
-        if (template.state === "ready") {
-          var url = "/saas_public/" + template.id + "/create-fast-build" + build_params;
-          console.log("Redirect to: " + url);
-          // When there's ready saas_template_operator obj, then start creating new build
-          window.location.href = url;
+    // Handle App selection
+    _onAppClick: function (event) {
+        const appName = $(event.currentTarget).data('name');
+        if (this.state.basketApps.has(appName)) {
+            this.state.basketApps.delete(appName);
         } else {
-          // If there's no ready saas_template_operator,
-          // recalling this func till the saas_template_operator obj isn't ready
-          setTimeout(goToBuild, 5000, build_params, template_id);
+            this.state.basketApps.add(appName);
         }
-      });
-  }
+        this.renderApps();
+        this.renderTotalPrice();
+        this._updateButtonsVisibility(); // Update button visibility
+    },
 
-  $("#minus-user").on("click", function () {
-    sanitizeUserInput();
-    var v = parseInt($("#users").val(), 10);
-    $("#users").val(Math.max(1, v - 1));
-    renderTotalPrice();
-  });
+    // Handle Package selection
+    _onPackageClick: function (event) {
+        const packageId = $(event.currentTarget).data('packageId');
+        // Toggle the selected package ID
+        this.state.chosenPackageId = this.state.chosenPackageId === packageId ? null : packageId;
 
-  $("#plus-user").on("click", function () {
-    sanitizeUserInput();
-    var v = parseInt($("#users").val(), 10);
-    $("#users").val(v + 1);
-    renderTotalPrice();
-  });
+        // Update UI with selected package
+        this.renderPackages();
+        this.renderTotalPrice(); // Recalculate and update price
+        this._updateButtonsVisibility(); // Update button visibility
+    },
 
-  $("#try-trial").on("click", function () {
-    if (basket_apps.size > 0) {
-      var build_params =
-        '?installing_modules=["' + Array.from(basket_apps).join('","') + '"]';
-      goToBuild(build_params);
-      $(".loader").show();
-    } else if (chosen_package_id) {
-      goToBuild("", parseInt(chosen_package_id, 10));
-      $(".loader").show();
-    } else {
-      alert("Please, choose apps or package first");
-    }
-  });
+    // Switch between periods (year/month)
+    _onPeriodSwitch: function (event) {
+        this.state.period = $(event.currentTarget).data('period');
+        this.renderTotalPrice(); // Recalculate price based on selected period
+    },
 
-  $("#buy-now").on("click", function () {
-    var product_ids = [];
-    if (basket_apps.size > 0) {
-      product_ids = Array.from(basket_apps).map(function (m) {
-        return $("[data-name=" + m + "]").data("product-id-" + period);
-      });
-    } else if (chosen_package_id) {
-      product_ids = [
-        $("[data-package-id=" + chosen_package_id + "]").data("product-id-" + period),
-      ];
-    } else {
-      alert("Please, choose apps or package first");
-      return;
-    }
+    // Increase user count
+    _onIncreaseUsers: function () {
+        this.state.numUsers += 1;
+        this.renderTotalPrice();
+    },
 
-    session
-      .rpc("/price/cart/update_json", {
-        product_ids: product_ids,
-        period: period,
-        user_cnt: parseInt($("#users").val(), 10),
-      })
-      .then(function (res) {
-        window.location.href = res.link;
-      });
-  });
+    // Decrease user count
+    _onDecreaseUsers: function () {
+        if (this.state.numUsers > 1) {
+            this.state.numUsers -= 1;
+        }
+        this.renderTotalPrice();
+    },
 
-  // Add active class to active period
-  $(".switch-period").on("click", function () {
-    $(".switch-period").removeClass("active");
-    $(this).addClass("active");
-    period = $(this).data("period");
-    renderTotalPrice();
-  });
+    // Try trial action
+    _onTryTrial: function () {
+        this._goToBuild(this.getInputs(), this.state.chosenPackageId);
+    },
 
-  // If not mobile device then compute #price-window css top property from navbar height
-  if (window.matchMedia("(min-width: 768px)").matches) {
-    const navbar_height = $("header").height();
-    const price_window_top = navbar_height + 10;
-    $("#price-window").css("top", price_window_top);
-  }
+    // Buy now action
+    _onBuyNow: function () {
+        // Generate product IDs based on basket apps or selected package
+        const productIds = this.state.basketApps.size > 0
+            ? Array.from(this.state.basketApps).map(appName =>
+                $(`[data-name="${appName}"]`).data(`product-id-${this.state.period}`)
+            )
+            : [ $(`[data-package-id="${this.state.chosenPackageId}"]`).data(`product-id-${this.state.period}`) ];
 
-  renderTotalPrice();
+        // Check if there are selected apps or packages, if neither is selected, show an alert
+        if (productIds.length === 0) {
+            return;
+        }
 
-  return {
-    getInputs: getInputs,
-  };
+        // Determine user count, ensuring we use this.state.numUsers if it exists, else fallback to the DOM value
+        const userCnt = ($("#users").length ? this.state.numUsers || parseInt($("#users").val(), 0) : 0);
+
+        // Call the RPC to update the cart and redirect to the checkout page
+        rpc('/price/cart/update_json', {
+            product_ids: productIds,
+            period: this.state.period, // Use this.state.period for consistency
+            user_cnt: userCnt
+        }).then((res) => {
+            window.location.href = res.link;
+        });
+    },
+
+    // Render the total price calculation
+    renderTotalPrice: function () {
+        // Calculate the total app prices based on selected apps and period (year/month)
+        const sumAppPrices = this.state.apps.filter(app => this.state.basketApps.has(app.name))
+            .reduce((acc, app) => {
+                const appPrice = this.state.period === 'year' ? app.yearPrice : app.monthPrice;
+                return acc + appPrice;
+            }, 0);
+
+        // Find the selected package and calculate its price based on the period
+        const chosenPackage = this.state.packages.find(pkg => pkg.id === this.state.chosenPackageId);
+        let sumPackagePrices = 0;
+        if (chosenPackage) {
+            sumPackagePrices = this.state.period === 'year' ? chosenPackage.year_price : chosenPackage.month_price;
+        }
+
+        // Calculate user price if applicable
+        let userPrice = 0;
+        if ($("#users_block").length) {
+            userPrice = this.state.numUsers * (parseFloat(this.$('#users_block').data("price-" + this.state.period), 1));
+        }
+
+        // Calculate the total price by adding app prices, package prices, and user prices
+        const totalPrice = sumAppPrices + sumPackagePrices + userPrice;
+
+        // Update the DOM with the calculated values
+        this.$('#price').text(totalPrice.toFixed(2));  // Show total price
+        this.$('#box-period').text(this.state.period); // Show selected period
+        this.$('#users-qty').text(this.state.numUsers); // Show the number of users
+        this.$('#apps-qty').text(this.state.basketApps.size + (this.state.chosenPackageId ? 1 : 0)); // Show total apps + package count
+        this.$('#users-cnt-cost').text(userPrice.toFixed(2)); // Show user price
+        this.$('#apps-cost').text((sumAppPrices + sumPackagePrices).toFixed(2)); // Show total cost of apps + package
+
+        // Optionally, handle button visibility based on the presence of selected apps or packages
+        if (this.state.basketApps.size === 0 && !this.state.chosenPackageId) {
+            this.$('#btn-block').hide(); // Hide button if nothing is selected
+        } else {
+            this.$('#btn-block').show(); // Show button if something is selected
+        }
+    },
+
+    // Render selected apps in the UI
+    renderApps: function () {
+        this.state.apps.forEach(app => {
+            const element = this.$(`[data-name="${app.name}"]`);
+            element.toggleClass('green-border', this.state.basketApps.has(app.name));
+        });
+    },
+
+    // Render selected package in the UI
+    renderPackages: function () {
+        console.log("this.state.packages", this.state.packages);
+        this.state.packages.forEach(pkg => {
+            const element = this.$(`[data-package-id="${pkg.id}"]`);
+            element.toggleClass('green-border', pkg.id === this.state.chosenPackageId);
+        });
+    },
+
+    // Get the user inputs for proceeding with the trial or purchase
+    getInputs: function () {
+        return {
+            basketApps: Array.from(this.state.basketApps),
+            chosenPackageId: this.state.chosenPackageId,
+            period: this.state.period,
+            userCnt: this.state.numUsers,
+        };
+    },
+
+    // Navigate to the build process
+    _goToBuild: function (buildParams, templateId) {
+        rpc("/check_saas_template", { template_id: templateId }).then((template) => {
+            if (template.state === 'ready') {
+                const url = `/saas_public/${template.id}/create-fast-build${buildParams}`;
+                window.location.href = url;
+            } else {
+                setTimeout(() => this._goToBuild(buildParams, templateId), 5000);
+            }
+        });
+    },
+
+    // Update button visibility based on selections
+    _updateButtonsVisibility: function () {
+        if (this.state.basketApps.size > 0 || this.state.chosenPackageId !== null) {
+            this.$('#btn-block').show(); // Show the buttons
+        } else {
+            this.$('#btn-block').hide(); // Hide the buttons if nothing is selected
+        }
+    },
 });
+
+publicWidget.registry.saasAppsWidget = SaasAppsWidget;

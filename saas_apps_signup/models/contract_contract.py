@@ -144,6 +144,8 @@ class Contract(models.Model):
 
             build.write(build_vals)
 
+            print("installing_modules_varinstalling_modules_var", installing_modules_var)
+
             template_operator.create_db(
                 key_values={"installing_modules": installing_modules_var},
                 with_delay=False,

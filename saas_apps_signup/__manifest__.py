@@ -35,7 +35,7 @@
     "demo": [],
     "assets": {
         "web.assets_frontend": [
-            "saas_apps_signup/static/src/js/saas_apps.js",
+            # "saas_apps_signup/static/src/js/saas_apps.js",
             "saas_apps_signup/static/src/js/signup.js",
         ],
     },

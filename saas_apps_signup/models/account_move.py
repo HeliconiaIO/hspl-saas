@@ -17,7 +17,7 @@ class AccountMove(models.Model):
         today = date.today()
 
         for order in sale_lines.mapped("order_id"):
-            sale_lines_in_order = sale_lines.filtered(lambda x: x.order_id == order)
+            sale_lines_in_order = sale_lines.filtered(lambda x: x.order_id == order and x.product_id.is_saas_product == True)
             new_contract_lines = []
             partner = order.partner_id
             subscription_period = False

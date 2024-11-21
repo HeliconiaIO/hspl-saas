@@ -124,7 +124,9 @@ def unmap_domain(domain):
 
 
 def execute_kw(db_name, model, method, args, kwargs):
-    return execute(db_name, SUPERUSER_ID, model, method, *args, **kwargs)
+    print(">>>>>>>>>>>", db_name, model, method, args, kwargs)
+    kw = kwargs
+    return execute(db_name, SUPERUSER_ID, model, method, *args, **kw)
 
 
 def create_backup(db_name):
