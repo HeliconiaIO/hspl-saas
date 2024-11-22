@@ -1,38 +1,23 @@
-/* Copyright 2020 Vildan Safin <https://www.it-projects.info/team/Enigma228322>
- License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).*/
- odoo.define('saas_apps.filter_button', function (require) {
-    "use strict";
+import { ListController } from "@web/views/list/list_controller";
+import { useService } from "@web/core/utils/hooks";
+import {registry} from "@web/core/registry";
+import {listView} from "@web/views/list/list_view";
 
-    var core = require('web.core');
-    var session = require('web.session');
-    var ListController = require('web.ListController');
-    var ListView = require('web.ListView');
-    var viewRegistry = require('web.view_registry');
+export class ManageAppsController extends ListController {
+    setup() {
+        super.setup();
+        this.orm = useService("orm");
+        this.action = useService("action");
+    }
 
-    var ManageAppsController = ListController.extend({
-        buttons_template: 'ManageApps.buttons',
-        events: _.extend({}, ListController.prototype.events, {
-            'click .refresh_apps_button': 'refresh_apps_button',
-        }),
+    async refresh_apps_button() {
+        const action = await this.orm.call("saas.app", 'action_make_applist_from_local_instance', []);
+        return this.actionService.doAction(action);
+    }
+}
 
-        refresh_apps_button: function () {
-            // Loading all modules in saas.line from ir.module.module
-            this._rpc({
-                "model": "saas.app",
-                "method": "action_make_applist_from_local_instance",
-                "args": [],
-            }).then(function (result) {
-                window.location.reload()
-            });
-        }
-    });
-
-    var ManageAppsView = ListView.extend({
-        config: _.extend({}, ListView.prototype.config, {
-            Controller: ManageAppsController,
-        }),
-    });
-
-    viewRegistry.add('saas_apps_tree', ManageAppsView);
-
+registry.category("views").add("saas_apps_tree", {
+    ...listView,
+    buttonTemplate: 'ManageApps.buttons',
+    Controller: ManageAppsController,
 });

@@ -18,7 +18,7 @@ class SaasDb(models.Model):
         return [
             "|", "&",
             ("model_name", "=", "contract.contract"),
-            ("record_ids", "like", [self.contract_id.id]),
+            ("records", "in", [self.contract_id.id]),
         ] + super(SaasDb, self)._get_domain_of_queue_job_records()
 
     @api.model_create_multi

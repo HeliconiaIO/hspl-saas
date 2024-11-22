@@ -3,7 +3,7 @@
 import publicWidget from "@web/legacy/js/public/public_widget";
 import { rpc } from "@web/core/network/rpc";
 
-export const SaasAppsWidget = publicWidget.Widget.extend({
+export const saasApps = publicWidget.Widget.extend({
     selector: '.js_saas_apps', // The selector for your widget's container
     events: {
         'click .app': '_onAppClick',
@@ -168,7 +168,6 @@ export const SaasAppsWidget = publicWidget.Widget.extend({
 
     // Render selected package in the UI
     renderPackages: function () {
-        console.log("this.state.packages", this.state.packages);
         this.state.packages.forEach(pkg => {
             const element = this.$(`[data-package-id="${pkg.id}"]`);
             element.toggleClass('green-border', pkg.id === this.state.chosenPackageId);
@@ -207,4 +206,8 @@ export const SaasAppsWidget = publicWidget.Widget.extend({
     },
 });
 
-publicWidget.registry.saasAppsWidget = SaasAppsWidget;
+publicWidget.registry.saasApps = saasApps;
+
+export default {
+    saasApps: publicWidget.registry.saasApps
+};

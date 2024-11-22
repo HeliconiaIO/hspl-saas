@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates>
-    <t t-extend="ListView.buttons" t-name="ManageApps.buttons">
-        <t t-jquery="button.o_list_button_add" t-operation="after">
-            <button type="button" class="btn btn-secondary refresh_apps_button" accesskey="f">
+    <t t-inherit="web.ListView.Buttons" t-name="ManageApps.buttons">
+        <xpath expr="//div[hasclass('o_list_buttons')]" position="inside">
+            <button type="button" class="btn btn-secondary" t-on-click="() => this.refresh_apps_button()" accesskey="f">
                 Refresh
             </button>
-        </t>
+        </xpath>
     </t>
 </templates>

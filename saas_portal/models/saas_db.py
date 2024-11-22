@@ -22,7 +22,7 @@ class SaasDb(models.Model):
         return [
             "&",
             ("model_name", "=", "saas.db"),
-            ("record_ids", "like", [self.id]),
+            ("records", "in", [self.id]),
         ]
 
     def _compute_number_of_queue_jobs_to_be_done(self):
