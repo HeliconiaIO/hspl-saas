@@ -66,15 +66,18 @@ class SaasDb(models.Model):
 
         settings_model, settings_res_id = self.xmlid_to_res_model_res_id(
             "access_apps.group_allow_apps_only_from_settings")
-        self.execute_kw(settings_model, "write", [settings_res_id], {"users": [(3, new_user)]})
+        if settings_model and settings_res_id:
+            self.execute_kw(settings_model, "write", [settings_res_id], {"users": [(3, new_user)]})
 
         show_model, show_res_id = self.xmlid_to_res_model_res_id(
             "access_settings_menu.group_show_settings_menu")
-        self.execute_kw(show_model, "write", [show_res_id], {"users": [(3, new_user)]})
+        if show_model and show_res_id:
+            self.execute_kw(show_model, "write", [show_res_id], {"users": [(3, new_user)]})
 
         apps_model, apps_res_id = self.xmlid_to_res_model_res_id(
             "access_apps.group_allow_apps")
-        self.execute_kw(apps_model, "write", [apps_res_id], {"users": [(3, new_user)]})
+        if apps_model and apps_res_id:
+            self.execute_kw(apps_model, "write", [apps_res_id], {"users": [(3, new_user)]})
 
         template = self.env.ref("saas_build_admin.template_build_admin_is_set")
         template.with_context(build=self, build_admin_password=password).send_mail(self.admin_user.id, force_send=True, raise_exception=True)
