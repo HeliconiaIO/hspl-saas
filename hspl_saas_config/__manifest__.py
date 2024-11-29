@@ -12,7 +12,16 @@
     'category': 'Marketing',
     'version': '18.0.1.0.0',
     "license": "AGPL-3",
-    'depends': ['base', 'saas_apps', 'contract', 'saas_contract'],
+    'depends': [
+        'base',
+        'saas_apps',
+        'contract',
+        'saas_contract',
+        'saas_database_limit',
+        'saas_apps_signup',
+        'saas_contract',
+        'saas_access_apps'
+    ],
 
     'data': [
         'data/contract_cron.xml',
