@@ -39,18 +39,18 @@ class SaasDb(models.Model):
 
         return super(SaasDb, self).write(vals)
 
-    def write_values_to_build(self):
-        super(SaasDb, self).write_values_to_build()
-
-        if not self.max_users_limit:
-            return
-
-        self.execute_kw(
-            "base.limit.records_number",
-            "set_max_records",
-            "access_limit_max_users.max_users_limit",
-            self.max_users_limit,
-        )
+    # def write_values_to_build(self):
+    #     super(SaasDb, self).write_values_to_build()
+    #
+    #     if not self.max_users_limit:
+    #         return
+    #
+    #     self.execute_kw(
+    #         "base.limit.records_number",
+    #         "set_max_records",
+    #         "access_limit_max_users.max_users_limit",
+    #         self.max_users_limit,
+    #     )
 
     def read_values_from_build(self):
         vals = super(SaasDb, self).read_values_from_build()
@@ -59,7 +59,7 @@ class SaasDb(models.Model):
             users_count=self.execute_kw(
                 "res.users",
                 "search_count",
-                [(("is_excluded_from_limiting", "=", False))],
+                [],
             )
         )
 
